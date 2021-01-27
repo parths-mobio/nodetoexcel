@@ -4,7 +4,10 @@ var mysql=require('mysql');
 host:'localhost',
  user:'root',
  password:'',
- database:'test'
+ database:'test',
+ port:'3307'
+
+
  
 });
 module.exports=connection;

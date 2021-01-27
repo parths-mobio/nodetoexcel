@@ -1,13 +1,14 @@
 var express = require('express');
 var router = express.Router();
 const excel = require("exceljs");
-var item=require('../models/item');
-router.get('/',function(req,res,next){
-    item.getAllitem(function (err, customers, fields)
-    {
+var item = require('../models/item');
+router.get('/', function (req, res, next) {
+
+
+  item.getAllitem(function (err, customers, fields) {
     const jsonCustomers = JSON.parse(JSON.stringify(customers));
     console.log(jsonCustomers);
-    
+
 
     let workbook = new excel.Workbook(); //creating workbook
     let worksheet = workbook.addWorksheet("Customers"); //creating worksheet
@@ -25,13 +26,13 @@ router.get('/',function(req,res,next){
     worksheet.addRows(jsonCustomers);
 
     // Write to File
-    workbook.xlsx.writeFile("item.xlsx").then(function () {
+    workbook.xlsx.writeFile("item1.xlsx").then(function () {
       console.log("file saved!");
       res.send("Runnning successsfully");
     });
-    }
-    );
+  }
+  );
 });
 module.exports = {
-    routes: router
+  routes: router
 }
