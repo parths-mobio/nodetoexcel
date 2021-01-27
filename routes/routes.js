@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 const excel = require("exceljs");
+const readXlsxFile = require('read-excel-file/node');
 var item = require('../models/item');
+var connection = require('../dbconnection');
 router.get('/', function (req, res, next) {
 
 
@@ -32,6 +34,27 @@ router.get('/', function (req, res, next) {
     });
   }
   );
+});
+
+router.get('/import', function (req, res, next) {
+  readXlsxFile('item.xlsx').then((rows) => {
+
+    console.log(rows);
+    rows.shift();
+    let query = 'INSERT INTO item (id, name, description, quantity, amount) VALUES ?';
+    connection.query(query, [rows], (error, response) => {
+      console.log(error || response);
+      if (error) {
+        res.send("Not Successfull");
+      }
+      else {
+        res.send("Running successfully");
+      }
+    });
+
+  });
+
+
 });
 module.exports = {
   routes: router
