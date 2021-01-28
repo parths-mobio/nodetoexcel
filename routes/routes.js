@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const excel = require("exceljs");
+const multer = require('multer');
 const readXlsxFile = require('read-excel-file/node');
 var item = require('../models/item');
 var connection = require('../dbconnection');
@@ -56,6 +57,51 @@ router.get('/import', function (req, res, next) {
 
 
 });
+
+
+global.__basedir = __dirname;
+
+// -> Multer Upload Storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, __basedir + '/uploads/')
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname)
+  }
+});
+
+const upload = multer({ storage: storage });
+
+router.post('/uploadfile', upload.single("uploadfile"), (req, res) => {
+  importExcelData2MySQL(__basedir + '/uploads/' + req.file.filename);
+  res.json({
+    'msg': 'File uploaded/import successfully!', 'file': req.file
+  });
+
+  function importExcelData2MySQL(filePath) {
+
+    readXlsxFile(filePath).then((rows) => {
+
+      console.log(rows);
+      rows.shift();
+      
+      let query = 'INSERT INTO item (id, name, description, quantity, amount) VALUES ?';
+      connection.query(query, [rows], (error, response) => {
+        console.log(error || response);
+
+      });
+
+    });
+  }
+
+
+
+
+});
+
+
+
 module.exports = {
   routes: router
 }
