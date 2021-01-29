@@ -29,7 +29,7 @@ router.get('/', function (req, res, next) {
     worksheet.addRows(jsonCustomers);
 
     // Write to File
-    workbook.xlsx.writeFile("item1.xlsx").then(function () {
+    workbook.xlsx.writeFile("items.xlsx").then(function () {
       console.log("file saved!");
       res.send("Runnning successsfully");
     });
@@ -71,21 +71,37 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+
+});
 
 router.post('/uploadfile', upload.single("uploadfile"), (req, res) => {
   importExcelData2MySQL(__basedir + '/uploads/' + req.file.filename);
+
   res.json({
     'msg': 'File uploaded/import successfully!', 'file': req.file
   });
 
   function importExcelData2MySQL(filePath) {
 
+    var allowedExtensions = /(\.xlsx)$/i;
+    if (!allowedExtensions.exec(filePath)) {
+      console.log("File Type Error");
+      res.send("File Type Error");
+
+    }
+    if (req.file.size > 10000) {
+      console.log("File Size is too large. Allowed file size is 100KB");
+      res.send("File Size is too large. Allowed file size is 100KB");
+
+    }
+
     readXlsxFile(filePath).then((rows) => {
 
       console.log(rows);
       rows.shift();
-      
+
       let query = 'INSERT INTO item (id, name, description, quantity, amount) VALUES ?';
       connection.query(query, [rows], (error, response) => {
         console.log(error || response);
